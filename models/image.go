@@ -1,8 +1,10 @@
 package models
 
 import (
+	"encoding/json"
 	"gorm.io/datatypes"
 	"time"
+	"webback/middlewares"
 )
 
 type streakType string
@@ -25,7 +27,20 @@ type Image struct {
 
 // MarshalJSON custom JSON marshaling for public image response
 func (i Image) MarshalJSON() ([]byte, error) {
-	return nil, nil
+	publicImage := struct {
+		Name           string   `json:"name"`
+		Uploader       string   `json:"uploader"`
+		UploadDateTime int64    `json:"uploadDate"`
+		StaticPath     string   `json:"url"`
+		Tags           []string `json:"tags"`
+	}{
+		Name:           i.ID,    // Probably needs to be replaced
+		Uploader:       "Steve", // Sort of unnecessary, will have to discuss with Adrian
+		UploadDateTime: i.TimeOfObservation.Unix(),
+		StaticPath:     middlewares.GetStaticURL(i.ID),
+		Tags:           []string{"astronomy"}, // Need to get tags into the db
+	}
+	return json.Marshal(publicImage)
 }
 
 // UnmarshalJSON custom JSON unmarshalling for image post request
