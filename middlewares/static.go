@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// Retrieves the URL for serving static images
 func GetStaticURL(imageID string) string {
 	var imagePath = fmt.Sprintf("/static/%s.webp", imageID)
 	_, err := os.Stat(imagePath)
@@ -14,5 +15,6 @@ func GetStaticURL(imageID string) string {
 		// Return placeholder image if file can't be accessed
 		return "/static/billy.jpeg"
 	}
+
 	return imagePath
 }

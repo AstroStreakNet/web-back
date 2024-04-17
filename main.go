@@ -12,12 +12,14 @@ func main() {
 
 	// Setup router
 	r := gin.Default()
+
 	// Setup static image serving
 	r.Static("/public", "./static")
+
 	// Add controllers
 	r.GET("/image", controllers.GetImageAll)
 
-	// Run
+	// Run on port 8080
 	err := r.Run(":8080")
 	if err != nil {
 		return

@@ -8,10 +8,12 @@ import (
 	"webback/models"
 )
 
+// Handle HTTP POST requests for uploading images
 func PostImage(c *gin.Context) {
 
 }
 
+// Handles HTTP GET requests to retrieve all public images from the database
 func GetImageAll(c *gin.Context) {
 	// Query database for public images
 	var images []models.Image
@@ -28,3 +30,4 @@ func GetImageAll(c *gin.Context) {
 	// Return data with 200 response
 	c.JSON(http.StatusOK, jsonData)
 }
+
