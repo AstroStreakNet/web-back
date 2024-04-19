@@ -9,7 +9,7 @@ import (
 	"webback/models"
 )
 
-// Handle HTTP POST requests for uploading images
+// PostImage handles HTTP POST requests for uploading images
 func PostImage(c *gin.Context) {
 	var req PostImageRequest
 	if err := c.ShouldBind(&req); err != nil {
@@ -19,7 +19,7 @@ func PostImage(c *gin.Context) {
 	// image := req.Image
 }
 
-// Handles HTTP GET requests to retrieve all public images from the database
+// GetImageAll handles HTTP GET requests to retrieve all public images from the database
 func GetImageAll(c *gin.Context) {
 	// Query database for public images
 	var images []models.Image
