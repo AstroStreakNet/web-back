@@ -18,3 +18,8 @@ func GetStaticURL(imageID string) string {
 
 	return imagePath
 }
+
+func CreateStatic(imageID string) error {
+	//
+	return nil
+}

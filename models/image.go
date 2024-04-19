@@ -42,8 +42,3 @@ func (i Image) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(publicImage)
 }
-
-// UnmarshalJSON custom JSON unmarshalling for image post request
-func (i Image) UnmarshalJSON(data []byte) error {
-	return nil
-}
