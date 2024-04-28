@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+    "time"
+)
 
 type Authentication struct {
 	ID           uint      `gorm:"primaryKey; column:auth_id; type:INT"`

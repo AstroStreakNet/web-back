@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/datatypes"
+import (
+    "gorm.io/datatypes"
+)
 
 type Analytics struct {
 	ID                uint           `gorm:"primaryKey; column:analytics_id; type:INT"`

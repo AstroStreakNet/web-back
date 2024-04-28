@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/datatypes"
+import (
+    "gorm.io/datatypes"
+)
 
 type gender string
 

@@ -1,6 +1,8 @@
 package middlewares
 
-import "golang.org/x/crypto/bcrypt"
+import (
+    "golang.org/x/crypto/bcrypt"
+)
 
 // Const
 const hashCost int = 8 // Amount of iterations of password hashing, min 2 and max 31
