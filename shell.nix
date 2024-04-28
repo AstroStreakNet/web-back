@@ -1,16 +1,20 @@
 { pkgs ? import <nixpkgs> {} }:
 
 pkgs.mkShell {
-  buildInputs = [
-    pkgs.go
-    pkgs.postgresql
-    pkgs.git 
-  ];
+    buildInputs = [
+        pkgs.go
+        pkgs.postgresql
+        pkgs.git 
+    ];
 
-  # Set up the GOPATH environment variable
-  shellHook = ''
-    # ensure go modules are enabled
-    export GO111MODULE=on
-    go mod tidy
-  '';
+    # Set up fresh environment
+    shellHook = ''
+        # remove old go.mod and go.sum
+        # ducttape fix to ensure interpreter stuff is visible to the syscall
+        # since nix is not the primary dev env for the project
+        rm go.mod go.sum
+        go mod init webback
+        go mod tidy
+        go run ./main.go
+    '';
 }
