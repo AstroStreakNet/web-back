@@ -1,9 +1,0 @@
-.gitignore
-.idea/
-
-logs/
-
-webback 
-go.mod
-go.sum
-
