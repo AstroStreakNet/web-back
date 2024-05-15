@@ -1,3 +1,5 @@
+// middlewares/passwords.go
+
 package middlewares
 
 import (
@@ -18,3 +20,4 @@ func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
+

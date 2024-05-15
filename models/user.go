@@ -1,3 +1,5 @@
+// models/user.go
+
 package models
 
 import (
@@ -23,3 +25,4 @@ type User struct {
 	Permissions  uint           `gorm:"column:permissions; type:TINYINT"`
 	ImagePublish uint           `gorm:"column:image_publish; type:TINYINT"`
 }
+

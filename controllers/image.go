@@ -1,3 +1,5 @@
+// controllers/image.go
+
 package controllers
 
 import (
@@ -44,3 +46,4 @@ type PostImageRequest struct {
 	AllowPublic bool                  `json:"allowPublic"`
 	AllowML     bool                  `json:"allowML"`
 }
+

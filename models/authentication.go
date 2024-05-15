@@ -1,3 +1,5 @@
+// models/authentication.go
+
 package models
 
 import (
@@ -14,3 +16,4 @@ type Authentication struct {
 	SessionToken string    `gorm:"column:session_token; type:VARCHAR(255)"`
 	// TODO: Ask Emily about Schema
 }
+

@@ -1,3 +1,5 @@
+// controllers/user.go
+
 package controllers
 
 import (
@@ -13,3 +15,4 @@ func Login(c *gin.Context) {
 func Register(c *gin.Context) {
 
 }
+
