@@ -1,3 +1,5 @@
+// models/image.go
+
 package models
 
 import (
@@ -42,3 +44,4 @@ func (i Image) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(publicImage)
 }
+

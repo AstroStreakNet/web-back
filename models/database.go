@@ -1,3 +1,5 @@
+// models/database.go
+
 package models
 
 import (
@@ -17,3 +19,4 @@ func Connect() {
 
 	DB = database
 }
+

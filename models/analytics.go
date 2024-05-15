@@ -1,6 +1,10 @@
+// models/analytics.go
+
 package models
 
-import "gorm.io/datatypes"
+import (
+    "gorm.io/datatypes"
+)
 
 type Analytics struct {
 	ID                uint           `gorm:"primaryKey; column:analytics_id; type:INT"`
@@ -15,3 +19,4 @@ type Analytics struct {
 	TimeBetweenVisits datatypes.Time `gorm:"column:time_between_visits; type:TIME"`
 	ImageID           string         `gorm:"foreignKey:image_id; column:fk_image_id; type:VARCHAR(45)"`
 }
+

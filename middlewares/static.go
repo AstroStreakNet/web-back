@@ -1,3 +1,5 @@
+// middlewares/static.go
+
 package middlewares
 
 import (
@@ -23,3 +25,4 @@ func CreateStatic(imageID string) error {
 	//
 	return nil
 }
+
