@@ -18,6 +18,7 @@ func main() {
 
 	// Add controllers
 	r.GET("/image", controllers.GetImageAll)
+    r.POST("/CLI", controllers.HandleBrowseRequest)
 
 	// Run on port 8080
 	err := r.Run(":8080")
