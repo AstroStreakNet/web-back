@@ -13,7 +13,7 @@ type BrowseCriteria struct {
 	NotContains string `json:"notContains"`
 	Date        string `json:"date"`
 	Count       int    `json:"count"`
-	Trainable   int    `json:"trainable"`
+	Trainable   bool   `json:"trainable"`
 }
 
 // HandleBrowseRequest understand cli requests
