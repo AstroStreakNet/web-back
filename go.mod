@@ -4,6 +4,7 @@ go 1.21.9
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.22.0
 	gorm.io/datatypes v1.2.0
 	gorm.io/gorm v1.25.10
