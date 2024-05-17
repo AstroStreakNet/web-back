@@ -3,13 +3,30 @@
 package controllers
 
 import (
-	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"log"
+	// "encoding/json"
+	"fmt"
+	// "log"
 	"mime/multipart"
 	"net/http"
-	"webback/models"
+	// "webback/models"
+
+	"github.com/gin-gonic/gin"
 )
+
+// Request Structure
+type PostImageRequest struct {
+	Image       *multipart.FileHeader `form:"image"`
+	AllowPublic bool                  `json:"allowPublic"`
+	AllowML     bool                  `json:"allowML"`
+}
+
+type ImageCriteria struct {
+    Name        string              `form:"name"`
+    Uploader    string              `form:"uploader"`
+    UploadDate  int                 `form:"uploadDate"`
+    URL         string              `form:"url"`
+    TAGS      []string              `form:"tags"`
+}
 
 // PostImage handles HTTP POST requests for uploading images
 func PostImage(c *gin.Context) {
@@ -23,27 +40,19 @@ func PostImage(c *gin.Context) {
 
 // GetImageAll handles HTTP GET requests to retrieve all public images from the database
 func GetImageAll(c *gin.Context) {
-	// Query database for public images
-	var images []models.Image
-	models.DB.Table("images").Where("allow_public = ?", true).Find(&images)
-
-	// Marshall data to json
-	jsonData, err := json.Marshal(images)
-	if err != nil {
-		// Abort if failure
-		c.AbortWithStatus(http.StatusInternalServerError)
-		log.Fatalf("Failed to marshall images: %s", err)
+    var criteria = ImageCriteria{}
+    
+	if err := c.BindJSON(&criteria); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+		return
 	}
 
-	// Return data with 200 response
-	c.JSON(http.StatusOK, jsonData)
-}
+    // process image criterias
 
-// Request Structure
+    // only for testing
+    fmt.Printf("[request] Name=%v Uploader=%v UDate=%v URL=%v TAGS=%v",
+    criteria.Name, criteria.Uploader, criteria.UploadDate, criteria.URL, criteria.TAGS)
 
-type PostImageRequest struct {
-	Image       *multipart.FileHeader `form:"image"`
-	AllowPublic bool                  `json:"allowPublic"`
-	AllowML     bool                  `json:"allowML"`
+	c.JSON(http.StatusOK, gin.H{"message": "request received"})
 }
 
