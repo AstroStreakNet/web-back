@@ -14,24 +14,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Request Structure
-type PostImageRequest struct {
-	Image       *multipart.FileHeader `form:"image"`
-	AllowPublic bool                  `json:"allowPublic"`
-	AllowML     bool                  `json:"allowML"`
+type ImageCriteria struct {
+    Name        string               `form:"name"`
+    Uploader    string               `form:"uploader"`
+    UploadDate  int                  `form:"uploadDate"`
+    URL         string               `form:"url"`
+    TAGS      []string               `form:"tags"`
 }
 
-type ImageCriteria struct {
-    Name        string              `form:"name"`
-    Uploader    string              `form:"uploader"`
-    UploadDate  int                 `form:"uploadDate"`
-    URL         string              `form:"url"`
-    TAGS      []string              `form:"tags"`
+// Request Structure
+type UploadTags struct {
+    Image       *multipart.FileHeader `form:"image"`
+    AllowPublic bool                  `json:"allowPublic"`
+    AllowML     bool                  `json:"allowML"`
+    Telescope   string                `json:"telescope"`
+    Observatory string                `json:"observatory"`
+    RightAscen  string                `json:"rightAscen"`
+    Declination string                `json:"declination"`
+    Julian      string                `json:"julian"`
+    Exposure    string                `json:"exposure"`
+    StreakType  string                `json:"streakType"`
 }
 
 // PostImage handles HTTP POST requests for uploading images
 func PostImage(c *gin.Context) {
-	var req PostImageRequest
+	var req UploadTags
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -58,12 +65,17 @@ func PostImage(c *gin.Context) {
 		return
 	}
 
-	processImage(imagePath, req.AllowPublic, req.AllowML)
+    processImage(imagePath, req.AllowPublic, req.AllowML, req.Telescope,
+        req.Observatory, req.RightAscen, req.Declination, req.Julian, req.Exposure)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Image uploaded successfully"})
 }
 
 // Process image and add to database
-func processImage(imagePath string, allowPublic, allowML bool) {
+func processImage(imagePath string, allowPublic bool, allowML bool, telescope string, 
+    observatory string, rightAscen string, declination string, date string, 
+    exposure string) {
+
     // call telescope with path to image 
     // add image to database
 }
