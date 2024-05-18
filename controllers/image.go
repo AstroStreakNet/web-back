@@ -5,6 +5,7 @@ package controllers
 import (
 	"fmt"
 	"log"
+    "time"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -31,9 +32,12 @@ type UploadTags struct {
     Observatory string                `json:"observatory"`
     RightAscen  string                `json:"rightAscen"`
     Declination string                `json:"declination"`
-    Julian      string                `json:"julian"`
-    Exposure    string                `json:"exposure"`
+    Julian      time.Time             `json:"julian"`
+    Exposure    time.Time             `json:"exposure"`
     StreakType  string                `json:"streakType"`
+    Creation    string                `json:"creationDate"`
+    // tags string array
+    // cords
 }
 
 // PostImage handles HTTP POST requests for uploading images
@@ -57,7 +61,6 @@ func PostImage(c *gin.Context) {
 
     mediaPath := os.Getenv("MEDIA_PATH")
 
-
 	// Save the uploaded image to a specific location
 	imagePath := (mediaPath + req.Image.Filename)
 	if err := c.SaveUploadedFile(req.Image, imagePath); err != nil {
@@ -73,10 +76,13 @@ func PostImage(c *gin.Context) {
 
 // Process image and add to database
 func processImage(imagePath string, allowPublic bool, allowML bool, telescope string, 
-    observatory string, rightAscen string, declination string, date string, 
-    exposure string) {
+    observatory string, rightAscen string, declination string, date time.Time, 
+    exposure time.Time) {
 
     // call telescope with path to image 
+
+
+    // telescope will return cords and contains which is required for the database
     // add image to database
 }
 
