@@ -1,3 +1,7 @@
+github.com/AstroStreakNet/telescope v0.3.0 h1:Y+FPEDjKFsahDrRJv/8ljUT9AXJ52IDRrBDI7NZWAtU=
+github.com/AstroStreakNet/telescope v0.3.0/go.mod h1:85L3nL2C7OFH19En7Vwl6C0f8Qoe9PgmcyZvt5PPkw8=
+github.com/astrogo/fitsio v0.3.0 h1:iQ/lGCREuct04H1dTzPLndbzGo/4SNgpO0JuAhM+YtE=
+github.com/astrogo/fitsio v0.3.0/go.mod h1:QRvq9GRh56Pa+TkX3iBHo6Upwd7KKIKgL2KO291Gdu0=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.9.1 h1:6iJ6NqdoxCDr6mbY8h18oSO+cShGSMRGCEo7F2h0x8s=
 github.com/bytedance/sonic v1.9.1/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
