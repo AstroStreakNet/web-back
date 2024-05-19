@@ -14,17 +14,23 @@ type streakType string
 const ()
 
 type Image struct {
-	ID                string         `gorm:"primaryKey; column:image_id; type:VARCHAR(45)"`
-	ImagePath         string         `gorm:"column:image_path; type:VARCHAR(45)"`
-	AllowPublic       bool           `gorm:"column:allow_public; type:TINYINT"` // Addition, not in Emily schema
-	AllowML           bool           `gorm:"column:allow_ml; type:TINYINT"`     // Addition, not in Emily schema
-	ObservatoryCode   string         `gorm:"column:observatory_code; type:VARCHAR(45)"`
-	TimeOfObservation time.Time      `gorm:"column:time_of_observation; type:DATETIME"`
-	ExposureDuration  datatypes.Time `gorm:"column:exposure_duration; type:TIME"`
-	StreakType        streakType     `gorm:"column:streak_type; type:ENUM()"`
-	UserID            string         `gorm:"foreignKey:user_id; column:fk_user_id; type:VARCHAR(45)"`
-	// Coordinates, need to change datatype, POINT won't work
-	// TODO add json tags
+	ID string `gorm:"primaryKey; column:image_id; type:VARCHAR(45)"`
+	// MetaData
+	ImagePath   string `gorm:"column:image_path; type:VARCHAR(45)"`
+	AllowPublic bool   `gorm:"column:allow_public; type:TINYINT"`
+	AllowML     bool   `gorm:"column:allow_ml; type:TINYINT"`
+	// Coordinates
+	RightAscension   float32        `gorm:"column:right_ascension; type:FLOAT"`
+	Declination      float32        `gorm:"column:declination; type:FLOAT"`
+	JulianDate       time.Time      `gorm:"column:time_of_observation; type:DATETIME"`
+	ExposureDuration datatypes.Time `gorm:"column:exposure_duration; type:TIME"`
+	// Observation data
+	ObservatoryCode string     `gorm:"column:observatory_code; type:VARCHAR(45)"`
+	StreakType      streakType `gorm:"column:streak_type; type:ENUM()"`
+	UserID          string     `gorm:"foreignKey:user_id; column:fk_user_id; type:VARCHAR(45)"`
+	// Astrometry references
+	AstroSubID     int  `gorm:"column:astro_sub_id; type:VARCHAR(45)"`
+	AstroProcessed bool `gorm:"column:astro_processed; type:TINYINT"`
 }
 
 // MarshalJSON custom JSON marshaling for public image response
@@ -38,10 +44,9 @@ func (i Image) MarshalJSON() ([]byte, error) {
 	}{
 		Name:           i.ID,    // Probably needs to be replaced
 		Uploader:       "Steve", // Sort of unnecessary, will have to discuss with Adrian
-		UploadDateTime: i.TimeOfObservation.Unix(),
+		UploadDateTime: i.JulianDate.Unix(),
 		StaticPath:     middlewares.GetStaticURL(i.ID),
 		Tags:           []string{"astronomy"}, // Need to get tags into the db
 	}
 	return json.Marshal(publicImage)
 }
-

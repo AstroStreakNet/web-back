@@ -1,7 +1,5 @@
-github.com/AstroStreakNet/telescope v0.3.0 h1:Y+FPEDjKFsahDrRJv/8ljUT9AXJ52IDRrBDI7NZWAtU=
-github.com/AstroStreakNet/telescope v0.3.0/go.mod h1:85L3nL2C7OFH19En7Vwl6C0f8Qoe9PgmcyZvt5PPkw8=
-github.com/astrogo/fitsio v0.3.0 h1:iQ/lGCREuct04H1dTzPLndbzGo/4SNgpO0JuAhM+YtE=
-github.com/astrogo/fitsio v0.3.0/go.mod h1:QRvq9GRh56Pa+TkX3iBHo6Upwd7KKIKgL2KO291Gdu0=
+github.com/AstroStreakNet/telescope v0.4.0 h1:sE+fZymBMLTJUcGc5zfLpwGUymVpvH9hV7LEMkyyHCw=
+github.com/AstroStreakNet/telescope v0.4.0/go.mod h1:85L3nL2C7OFH19En7Vwl6C0f8Qoe9PgmcyZvt5PPkw8=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.9.1 h1:6iJ6NqdoxCDr6mbY8h18oSO+cShGSMRGCEo7F2h0x8s=
 github.com/bytedance/sonic v1.9.1/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
@@ -81,8 +79,9 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/stretchr/testify v1.8.3 h1:RP3t2pwF7cMEbC1dqtB6poj3niw/9gnV4Cjg5oW5gtY=
 github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
+github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
+github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS4MhqMhdFk5YI=
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.11 h1:BMaWp1Bb6fHwEtbplGBGJ498wD+LKlNSl25MjdZY4dU=
