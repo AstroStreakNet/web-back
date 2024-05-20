@@ -1,9 +1,13 @@
 // models/analytics.go
 
+// model copied over from database API
+
 package models
 
 import (
-    "gorm.io/datatypes"
+	"webback/config"
+
+	"gorm.io/datatypes"
 )
 
 type Analytics struct {
@@ -20,3 +24,42 @@ type Analytics struct {
 	ImageID           string         `gorm:"foreignKey:image_id; column:fk_image_id; type:VARCHAR(45)"`
 }
 
+//var db *gorm.DB
+
+func init() {
+	config.Connect()
+	db.AutoMigrate(&Analytics{})
+}
+
+func CreateAnalytics(analytics *Analytics) *Analytics {
+	db.Create(analytics)
+	return analytics
+}
+
+func GetAllAnalytics() []Analytics {
+	var analytics []Analytics
+	db.Find(&analytics)
+	return analytics
+}
+
+func GetAnalyticsByID(ID int64) (*Analytics, error) {
+	var analytics Analytics
+	if err := db.First(&analytics, ID).Error; err != nil {
+		return nil, err
+	}
+	return &analytics, nil
+}
+
+func DeleteAnalytics(ID int64) error {
+	if err := db.Delete(&Analytics{}, ID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateAnalytics(analytics *Analytics) (*Analytics, error) {
+	if err := db.Save(analytics).Error; err != nil {
+		return nil, err
+	}
+	return analytics, nil
+}

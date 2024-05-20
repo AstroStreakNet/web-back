@@ -4,14 +4,20 @@ package models
 
 import (
 	"encoding/json"
-	"gorm.io/datatypes"
 	"time"
+
+	"webback/config"
 	"webback/middlewares"
+
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type streakType string
 
 const ()
+
+var db *gorm.DB
 
 type Image struct {
 	ID                string         `gorm:"primaryKey; column:image_id; type:VARCHAR(45)"`
@@ -45,3 +51,50 @@ func (i Image) MarshalJSON() ([]byte, error) {
 	return json.Marshal(publicImage)
 }
 
+// Initialize the database connection and auto-migrate the Image model
+func init() {
+	config.Connect()
+	db.AutoMigrate(&Image{})
+}
+
+func CreateImage(image *Image) *Image {
+	db.Create(&image)
+	return image
+}
+
+func GetAllImages() []Image {
+	var images []Image
+	db.Find(&images)
+	return images
+}
+
+func GetImageByID(ID string) (*Image, error) {
+	var image Image
+	if err := db.First(&image, "image_id = ?", ID).Error; err != nil {
+		return nil, err
+	}
+	return &image, nil
+}
+
+func DeleteImage(ID string) error {
+	if err := db.Delete(&Image{}, "image_id = ?", ID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (image *Image) Update(db *gorm.DB) error {
+	return db.Save(image).Error
+}
+
+func GetAllImagesPublic() []Image {
+	var images []Image
+	db.Where("allow_public = ?", true).Find(&images)
+	return images
+}
+
+func GetAllImagesML() []Image {
+	var images []Image
+	db.Where("allow_ml = ?", true).Find(&images)
+	return images
+}
