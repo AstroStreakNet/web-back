@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"log"
+	"os"
 	"webback/controllers"
 	"webback/repositories"
 	"webback/services"
@@ -48,7 +51,19 @@ func main() {
 	image := router.Group("/image")
 
 	// Setup static image serving
-	router.Static("/public", "./astro/public")
+	err = godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	urlPath := os.Getenv("URL_PATH")
+	if urlPath == "" {
+		log.Fatal("URL_PATH environment variable not set")
+	}
+	publicPath := os.Getenv("PUBLIC_PATH")
+	if publicPath == "" {
+		log.Fatal("PUBLIC_PATH environment variable not set")
+	}
+	router.Static(urlPath, publicPath)
 
 	// Assign routes to controller methods
 	image.GET("", imageController.GetImage)

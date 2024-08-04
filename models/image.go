@@ -13,6 +13,7 @@ type Image struct {
 	UserID *uint
 	// Path
 	Path string
+	URL  *string
 	// Image metadata
 	ObservatoryCode  *string
 	RightAscension   *string

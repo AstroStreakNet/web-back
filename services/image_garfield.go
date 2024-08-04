@@ -23,6 +23,7 @@ type ImageGarfield struct {
 	userRepository  repositories.User
 	privatePath     string
 	publicPath      string
+	urlPath         string
 }
 
 func NewImageGarfield(
@@ -45,6 +46,10 @@ func NewImageGarfield(
 	if publicPath == "" {
 		log.Fatal("PUBLIC_PATH environment variable not set")
 	}
+	urlPath := os.Getenv("URL_PATH")
+	if urlPath == "" {
+		log.Fatal("URL_PATH environment variable not set")
+	}
 
 	return &ImageGarfield{
 		imageRepository,
@@ -52,13 +57,16 @@ func NewImageGarfield(
 		userRepository,
 		privatePath,
 		publicPath,
+		urlPath,
 	}
 }
 
 func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.ImagePost, error) {
 
+	// Get JSON from request
 	imageJSON := request.MetaData
 
+	// Check if public
 	var basePath string
 	if imageJSON.AllowPublic {
 		basePath = service.publicPath
@@ -66,13 +74,22 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 		basePath = service.privatePath
 	}
 
-	filePath, err := service.generateFilePath(basePath)
+	// Generate file path and UUID
+	filePath, fileUUID, err := service.generateFilePath(basePath)
 	if err != nil {
 		slog.Error("Error generating file path " + err.Error())
 		return nil, err
 	}
 	filePath += "." + imageJSON.FileType
 
+	// If public create url
+	var urlPointer *string = nil
+	if imageJSON.AllowPublic {
+		url := service.urlPath + "/" + fileUUID + "." + imageJSON.FileType
+		urlPointer = &url
+	}
+
+	// Open file
 	fileHeader := request.FileData
 	file, err := fileHeader.Open()
 	if err != nil {
@@ -85,6 +102,7 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 		}
 	}(file)
 
+	// Copy file to byte slice
 	var bytesBuffer bytes.Buffer
 	_, err = io.Copy(&bytesBuffer, file)
 	if err != nil {
@@ -92,17 +110,21 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 	}
 	byteSlice := bytesBuffer.Bytes()
 
+	// Write byte slice to file storage
 	err = service.fileRepository.Write(&byteSlice, filePath)
 	if err != nil {
 		return nil, err
 	}
 
+	// Create model
 	image := models.Image{
 		Path:        filePath,
+		URL:         urlPointer,
 		AllowPublic: imageJSON.AllowPublic,
 		AllowML:     imageJSON.AllowML,
 	}
 
+	// Add image model to image repository
 	err = service.imageRepository.Create(&image)
 	if err != nil {
 		println("Error creating image: " + err.Error())
@@ -173,16 +195,16 @@ func (service *ImageGarfield) convertModelToResponse(image models.Image) respons
 	}
 }
 
-func (service *ImageGarfield) generateFilePath(basePath string) (string, error) {
+func (service *ImageGarfield) generateFilePath(basePath string) (string, string, error) {
 	slog.Debug("Generating file path")
 	fileUUID, err := uuid.NewV4()
 	if err != nil {
 		slog.Error("Error generating file uuid")
-		return "", err
+		return "", "", err
 	}
 	filePath := basePath + "/" + fileUUID.String()
 	if service.fileRepository.FileExists(filePath) {
 		return service.generateFilePath(basePath)
 	}
-	return filePath, nil
+	return filePath, fileUUID.String(), nil
 }
