@@ -13,6 +13,8 @@ require (
 )
 
 require (
+	github.com/AstroStreakNet/telescope v0.4.0 // indirect
+	github.com/astrogo/fitsio v0.3.0 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect

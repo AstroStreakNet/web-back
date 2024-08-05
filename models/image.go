@@ -12,8 +12,9 @@ type Image struct {
 	// ForeignKey, necessary for HAS MANY relationship in gorm
 	UserID *uint
 	// Path
-	Path string
-	URL  *string
+	Path         string
+	URL          *string
+	AstrometryID *string
 	// Image metadata
 	ObservatoryCode  *string
 	RightAscension   *string
