@@ -2,13 +2,11 @@ package services
 
 import (
 	"bytes"
+	"github.com/AstroStreakNet/telescope/astrometry"
 	"github.com/gofrs/uuid/v5"
-	"github.com/joho/godotenv"
 	"io"
-	"log"
 	"log/slog"
 	"mime/multipart"
-	"os"
 	"strconv"
 	"strings"
 	"webback/models"
@@ -21,8 +19,7 @@ type ImageGarfield struct {
 	imageRepository repositories.Image
 	fileRepository  repositories.File
 	userRepository  repositories.User
-	privatePath     string
-	publicPath      string
+	astrometryProxy astrometry.Client
 	urlPath         string
 }
 
@@ -30,64 +27,36 @@ func NewImageGarfield(
 	imageRepository repositories.Image,
 	userRepository repositories.User,
 	fileRepository repositories.File,
+	astrometryProxy astrometry.Client,
+	urlPath string,
 ) *ImageGarfield {
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-		return nil
-	}
-
-	privatePath := os.Getenv("PRIVATE_PATH")
-	if privatePath == "" {
-		log.Fatal("PRIVATE_PATH environment variable not set")
-	}
-	publicPath := os.Getenv("PUBLIC_PATH")
-	if publicPath == "" {
-		log.Fatal("PUBLIC_PATH environment variable not set")
-	}
-	urlPath := os.Getenv("URL_PATH")
-	if urlPath == "" {
-		log.Fatal("URL_PATH environment variable not set")
-	}
 
 	return &ImageGarfield{
 		imageRepository,
 		fileRepository,
 		userRepository,
-		privatePath,
-		publicPath,
+		astrometryProxy,
 		urlPath,
 	}
 }
 
 func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.ImagePost, error) {
 
+	// Begin Image creation
+	imageBuilder := models.NewImageBuilder()
+
 	// Get JSON from request
 	imageJSON := request.MetaData
+	imageBuilder.WithAllowPublic(imageJSON.AllowPublic)
+	imageBuilder.WithAllowML(imageJSON.AllowML)
 
-	// Check if public
-	var basePath string
-	if imageJSON.AllowPublic {
-		basePath = service.publicPath
-	} else {
-		basePath = service.privatePath
-	}
-
-	// Generate file path and UUID
-	filePath, fileUUID, err := service.generateFilePath(basePath)
+	// Generate file name
+	fileName, err := service.fileRepository.GenerateFileName(imageJSON.FileType)
 	if err != nil {
 		slog.Error("Error generating file path " + err.Error())
 		return nil, err
 	}
-	filePath += "." + imageJSON.FileType
-
-	// If public create url
-	var urlPointer *string = nil
-	if imageJSON.AllowPublic {
-		url := service.urlPath + "/" + fileUUID + "." + imageJSON.FileType
-		urlPointer = &url
-	}
+	imageBuilder.WithPath(fileName)
 
 	// Open file
 	fileHeader := request.FileData
@@ -102,30 +71,47 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 		}
 	}(file)
 
-	// Copy file to byte slice
+	// Copy file to byteBuffers
 	var bytesBuffer bytes.Buffer
-	_, err = io.Copy(&bytesBuffer, file)
-	if err != nil {
-		return nil, err
-	}
-	byteSlice := bytesBuffer.Bytes()
 
-	// Write byte slice to file storage
-	err = service.fileRepository.Write(&byteSlice, filePath)
-	if err != nil {
-		return nil, err
+	// If public create preview image
+	if imageJSON.AllowPublic {
+		var bytesBufferClone bytes.Buffer
+		tee := io.TeeReader(file, &bytesBufferClone)
+		_, err = io.Copy(&bytesBuffer, tee)
+		if err != nil {
+			return nil, err
+		}
+
+		err = service.fileRepository.Write(&bytesBuffer, fileName)
+		if err != nil {
+			return nil, err
+		}
+		err = service.fileRepository.WritePreview(&bytesBufferClone, fileName)
+		if err != nil {
+			slog.Error("Error writing preview file " + err.Error())
+			return nil, err
+		}
+
+		imageBuilder.WithURL(service.urlPath + "/" + fileName)
+
+	} else {
+		_, err = io.Copy(&bytesBuffer, file)
+		if err != nil {
+			return nil, err
+		}
+		err = service.fileRepository.Write(&bytesBuffer, fileName)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
-	// Create model
-	image := models.Image{
-		Path:        filePath,
-		URL:         urlPointer,
-		AllowPublic: imageJSON.AllowPublic,
-		AllowML:     imageJSON.AllowML,
-	}
+	// Build image
+	image := imageBuilder.Build()
 
 	// Add image model to image repository
-	err = service.imageRepository.Create(&image)
+	err = service.imageRepository.Create(image)
 	if err != nil {
 		println("Error creating image: " + err.Error())
 		return nil, err
@@ -168,10 +154,10 @@ func (service *ImageGarfield) GetAllImagesPublic() (*[]responses.ImageGet, error
 func (service *ImageGarfield) convertModelToResponse(image models.Image) responses.ImageGet {
 	slog.Debug("Converting model to response")
 	var displayName string
-	if image.UserID == nil {
+	if image.UserID == 0 {
 		displayName = "Anonymous"
 	} else {
-		user, err := service.userRepository.FindById(*image.UserID)
+		user, err := service.userRepository.FindById(image.UserID)
 		if err != nil {
 			displayName = "Anonymous"
 		} else {
@@ -180,8 +166,8 @@ func (service *ImageGarfield) convertModelToResponse(image models.Image) respons
 	}
 
 	var tags []string
-	if image.Tags != nil {
-		strings.Fields(*image.Tags)
+	if image.Tags != "" {
+		strings.Fields(image.Tags)
 	} else {
 		tags = []string{}
 	}
@@ -190,7 +176,7 @@ func (service *ImageGarfield) convertModelToResponse(image models.Image) respons
 		ID:         strconv.FormatUint(uint64(image.ID), 10),
 		User:       displayName,
 		UploadDate: image.CreatedAt.String(),
-		URL:        image.Path,
+		URL:        image.URL,
 		Tags:       tags,
 	}
 }

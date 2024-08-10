@@ -1,12 +1,18 @@
 package repositories
 
+import "bytes"
+
 type File interface {
 	Initialize() error
-	Read(path string) (*[]byte, error)
-	Write(data *[]byte, path string) error
-	Overwrite(data *[]byte, path string) error
-	Delete(path string) error
-	FileExists(path string) bool
+	Read(path string) (*bytes.Buffer, error)
+	Write(data *bytes.Buffer, fileName string) error
+	WritePreview(data *bytes.Buffer, fileName string) error
+	Overwrite(data *bytes.Buffer, fileName string) error
+	Delete(fileName string) error
+	DeletePreview(fileName string) error
+	GenerateFileName(fileType string) (string, error)
+	FileExists(fileName string) bool
+	PreviewExists(fileName string) bool
 }
 
 // Errors

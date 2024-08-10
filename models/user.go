@@ -2,16 +2,16 @@
 
 package models
 
-import "gorm.io/gorm"
+import "time"
 
 type User struct {
-	gorm.Model
+	ID          uint
+	CreatedAt   time.Time
 	Email       string
 	Password    string
 	DisplayName string
-	FirstName   *string
-	LastName    *string
+	FirstName   string
+	LastName    string
 	Role        string
-	// This is necessary to create the HAS MANY relationship in gorm.
-	Images []Image
+	Images      []uint
 }

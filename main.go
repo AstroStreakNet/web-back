@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/AstroStreakNet/telescope/astrometry"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/sqlite"
@@ -22,24 +23,54 @@ func newDatabaseConnection() *gorm.DB {
 }
 
 func main() {
+
+	// Load .env
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Get .env variables
+	privatePath := os.Getenv("PRIVATE_PATH")
+	if privatePath == "" {
+		log.Fatal("PRIVATE_PATH environment variable not set")
+	}
+	publicPath := os.Getenv("PUBLIC_PATH")
+	if publicPath == "" {
+		log.Fatal("PUBLIC_PATH environment variable not set")
+	}
+	urlPath := os.Getenv("URL_PATH")
+	if urlPath == "" {
+		log.Fatal("URL_PATH environment variable not set")
+	}
+	// In a cloud environment a secret vault should be used instead of environment variables
+	apiKey := os.Getenv("ASTROMETRY_API_KEY")
+	if apiKey == "" {
+		log.Fatal("ASTROMETRY_API_KEY not set")
+	}
+
 	// Connect to database
 	database := newDatabaseConnection()
 
-	// Instantiate repositories
+	// Repositories
 	imageRepository, err := repositories.NewImageRepositoryInDatabase(database)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create image repository: %v", err))
+		log.Fatal(fmt.Sprintf("failed to create image repository: %v", err))
 	}
 	userRepository, err := repositories.NewUserRepositoryInDatabase(database)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create user repository: %v", err))
+		log.Fatal(fmt.Sprintf("failed to create user repository: %v", err))
 	}
-	fileRepository := repositories.NewFileRepositoryOnSystem()
+	fileRepository := repositories.NewFileRepositoryOnSystem(privatePath, publicPath)
 
-	// Instantiate services
-	imageService := services.NewImageGarfield(imageRepository, userRepository, fileRepository)
+	// Proxies
+	astrometryProxy := astrometry.NewAstrometryClient(apiKey)
 
-	// Instantiate controllers
+	// Services
+	imageService := services.NewImageGarfield(
+		imageRepository, userRepository, fileRepository, *astrometryProxy, urlPath)
+
+	// Controllers
 	imageController := controllers.NewImageController(imageService)
 
 	// Setup router
@@ -51,18 +82,6 @@ func main() {
 	image := router.Group("/image")
 
 	// Setup static image serving
-	err = godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	urlPath := os.Getenv("URL_PATH")
-	if urlPath == "" {
-		log.Fatal("URL_PATH environment variable not set")
-	}
-	publicPath := os.Getenv("PUBLIC_PATH")
-	if publicPath == "" {
-		log.Fatal("PUBLIC_PATH environment variable not set")
-	}
 	router.Static(urlPath, publicPath)
 
 	// Assign routes to controller methods

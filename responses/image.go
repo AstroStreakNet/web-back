@@ -11,6 +11,3 @@ type ImageGet struct {
 type ImagePost struct {
 	Success bool `json:"success"`
 }
-
-type ImageUpdate ImagePost
-type ImageDelete ImagePost
