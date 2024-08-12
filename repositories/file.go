@@ -13,6 +13,8 @@ type File interface {
 	GenerateFileName(fileType string) (string, error)
 	FileExists(fileName string) bool
 	PreviewExists(fileName string) bool
+	GetFilePath(fileName string) string
+	GetPreviewPath(fileName string) string
 }
 
 // Errors

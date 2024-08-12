@@ -6,7 +6,6 @@ type User interface {
 	Initialize() error
 	FindAll() (*[]models.User, error)
 	FindById(id uint) (*models.User, error)
-	FindByAstronomerId(astronomerId uint) (*models.User, error)
 	FindByFirstName(name string) (*[]models.User, error)
 	FindByLastName(name string) (*[]models.User, error)
 	Create(user *models.User) error

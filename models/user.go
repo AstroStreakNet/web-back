@@ -1,17 +1,16 @@
-// models/user.go
-
 package models
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type User struct {
-	ID          uint
-	CreatedAt   time.Time
+	gorm.Model
 	Email       string
 	Password    string
 	DisplayName string
 	FirstName   string
 	LastName    string
 	Role        string
-	Images      []uint
+	Images      []Image // Necessary for HAS MANY relationship in GORM
 }

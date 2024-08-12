@@ -3,10 +3,15 @@ module webback
 go 1.22.1
 
 require (
+	cloud.google.com/go/firestore v1.16.0
+	github.com/AstroStreakNet/telescope v0.4.0
+	github.com/astrogo/fitsio v0.3.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gofrs/uuid/v5 v5.2.0
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.25.0
+	google.golang.org/api v0.189.0
+	google.golang.org/grpc v1.64.1
 	gorm.io/datatypes v1.2.0
 	gorm.io/driver/sqlite v1.4.3
 	gorm.io/gorm v1.25.10
@@ -17,10 +22,7 @@ require (
 	cloud.google.com/go/auth v0.7.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.3 // indirect
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
-	cloud.google.com/go/firestore v1.16.0 // indirect
 	cloud.google.com/go/longrunning v0.5.9 // indirect
-	github.com/AstroStreakNet/telescope v0.4.0 // indirect
-	github.com/astrogo/fitsio v0.3.0 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -63,11 +65,9 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/api v0.189.0 // indirect
 	google.golang.org/genproto v0.0.0-20240722135656-d784300faade // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240722135656-d784300faade // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240722135656-d784300faade // indirect
-	google.golang.org/grpc v1.64.1 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/mysql v1.4.7 // indirect

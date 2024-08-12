@@ -1,15 +1,12 @@
-// models/image.go
-
 package models
 
 import (
-	"time"
+	"gorm.io/gorm"
 )
 
 type Image struct {
-	ID               uint
-	CreatedAt        time.Time
-	UserID           uint
+	gorm.Model
+	UserID           *uint // ForeignKey, necessary for HAS MANY relationship in gorm
 	Path             string
 	URL              string
 	AstrometryID     string
@@ -27,8 +24,7 @@ type Image struct {
 // Builder
 
 type ImageBuilder struct {
-	ID               uint
-	UserID           uint
+	UserID           *uint
 	Path             string
 	URL              string
 	AstrometryID     string
@@ -47,13 +43,8 @@ func NewImageBuilder() *ImageBuilder {
 	return &ImageBuilder{}
 }
 
-func (builder *ImageBuilder) WithID(id uint) *ImageBuilder {
-	builder.ID = id
-	return builder
-}
-
-func (builder *ImageBuilder) WithUserID(userID uint) *ImageBuilder {
-	builder.UserID = userID
+func (builder *ImageBuilder) WithUserID(ID *uint) *ImageBuilder {
+	builder.UserID = ID
 	return builder
 }
 
@@ -119,8 +110,6 @@ func (builder *ImageBuilder) WithAllowML(allowML bool) *ImageBuilder {
 
 func (builder *ImageBuilder) Build() *Image {
 	return &Image{
-		ID:               builder.ID,
-		CreatedAt:        time.Now(),
 		UserID:           builder.UserID,
 		Path:             builder.Path,
 		URL:              builder.URL,

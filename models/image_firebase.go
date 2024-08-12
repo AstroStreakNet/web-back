@@ -1,8 +1,6 @@
 package models
 
 import (
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -22,34 +20,4 @@ type ImageFirebase struct {
 	Tags             []string  `firestore:"tags"`
 	AllowPublic      bool      `firestore:"allow_public"`
 	AllowML          bool      `firestore:"allow_ml"`
-}
-
-func imageFromFirebase(firebase ImageFirebase) *Image {
-
-	// User reference to id
-	userID64, err := strconv.ParseUint(firebase.User, 10, 32)
-	if err != nil {
-		//
-	}
-	userID := uint(userID64)
-
-	// Tags string array to single string
-	tags := strings.Join(firebase.Tags, " ")
-
-	return &Image{
-		CreatedAt:        firebase.CreatedAt,
-		UserID:           userID,
-		Path:             firebase.Path,
-		URL:              firebase.URL,
-		AstrometryID:     firebase.AstrometryID,
-		ObservatoryCode:  firebase.ObservatoryCode,
-		RightAscension:   firebase.RightAscension,
-		Declination:      firebase.Declination,
-		JulianDate:       firebase.JulianDate,
-		ExposureDuration: firebase.ExposureDuration,
-		StreakType:       firebase.StreakType,
-		Tags:             tags,
-		AllowPublic:      firebase.AllowPublic,
-		AllowML:          firebase.AllowML,
-	}
 }

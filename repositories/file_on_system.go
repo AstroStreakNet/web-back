@@ -80,7 +80,7 @@ func (repository *FileOnSystem) Write(data *bytes.Buffer, fileName string) error
 func (repository *FileOnSystem) WritePreview(data *bytes.Buffer, fileName string) error {
 	// Get preview file name
 	fileType := filepath.Ext(fileName)
-	previewFileName := strings.TrimSuffix(fileName, fileType) + ".jpeg"
+	previewFileName := strings.TrimSuffix(fileName, fileType) + ".jpg"
 
 	if repository.PreviewExists(previewFileName) {
 		return &FileAlreadyExists{}
@@ -186,6 +186,16 @@ func (repository *FileOnSystem) PreviewExists(fileName string) bool {
 	}
 	return true
 }
+
+func (repository *FileOnSystem) GetFilePath(fileName string) string {
+	return repository.privatePath + "/" + fileName
+}
+
+func (repository *FileOnSystem) GetPreviewPath(fileName string) string {
+	return repository.publicPath + "/" + fileName
+}
+
+// Private
 
 func (repository *FileOnSystem) convertImageToJPEG(data *bytes.Buffer, currentType string) (*bytes.Buffer, error) {
 	var newData bytes.Buffer

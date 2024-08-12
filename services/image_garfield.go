@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"mime/multipart"
+	"os"
 	"strconv"
 	"strings"
 	"webback/models"
@@ -73,38 +74,32 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 
 	// Copy file to byteBuffers
 	var bytesBuffer bytes.Buffer
+	_, err = io.Copy(&bytesBuffer, file)
+	// Write file
+	err = service.fileRepository.Write(&bytesBuffer, fileName)
+	if err != nil {
+		return nil, err
+	}
 
 	// If public create preview image
 	if imageJSON.AllowPublic {
-		var bytesBufferClone bytes.Buffer
-		tee := io.TeeReader(file, &bytesBufferClone)
-		_, err = io.Copy(&bytesBuffer, tee)
+
+		path := service.fileRepository.GetFilePath(fileName)
+		file, err := os.Open(path)
 		if err != nil {
-			return nil, err
+			return nil, err // TODO, bypass error and allow for partially correct submissions
 		}
 
-		err = service.fileRepository.Write(&bytesBuffer, fileName)
-		if err != nil {
-			return nil, err
-		}
-		err = service.fileRepository.WritePreview(&bytesBufferClone, fileName)
+		var bytesBuffer bytes.Buffer
+		_, err = io.Copy(&bytesBuffer, file)
+
+		err = service.fileRepository.WritePreview(&bytesBuffer, fileName)
 		if err != nil {
 			slog.Error("Error writing preview file " + err.Error())
 			return nil, err
 		}
 
 		imageBuilder.WithURL(service.urlPath + "/" + fileName)
-
-	} else {
-		_, err = io.Copy(&bytesBuffer, file)
-		if err != nil {
-			return nil, err
-		}
-		err = service.fileRepository.Write(&bytesBuffer, fileName)
-		if err != nil {
-			return nil, err
-		}
-
 	}
 
 	// Build image
@@ -154,10 +149,10 @@ func (service *ImageGarfield) GetAllImagesPublic() (*[]responses.ImageGet, error
 func (service *ImageGarfield) convertModelToResponse(image models.Image) responses.ImageGet {
 	slog.Debug("Converting model to response")
 	var displayName string
-	if image.UserID == 0 {
+	if image.UserID == nil {
 		displayName = "Anonymous"
 	} else {
-		user, err := service.userRepository.FindById(image.UserID)
+		user, err := service.userRepository.FindById(*image.UserID)
 		if err != nil {
 			displayName = "Anonymous"
 		} else {
@@ -165,12 +160,7 @@ func (service *ImageGarfield) convertModelToResponse(image models.Image) respons
 		}
 	}
 
-	var tags []string
-	if image.Tags != "" {
-		strings.Fields(image.Tags)
-	} else {
-		tags = []string{}
-	}
+	tags := strings.Fields(image.Tags)
 
 	return responses.ImageGet{
 		ID:         strconv.FormatUint(uint64(image.ID), 10),

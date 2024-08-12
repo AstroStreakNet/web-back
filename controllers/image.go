@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"webback/requests"
+	"webback/responses"
 	"webback/services"
 )
 
@@ -41,6 +42,7 @@ func (controller *Image) GetImage(c *gin.Context) {
 }
 
 func (controller *Image) PostImage(c *gin.Context) {
+
 	var request requests.ImagePost
 	if err := c.ShouldBind(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -54,10 +56,18 @@ func (controller *Image) PostImage(c *gin.Context) {
 		return
 	}
 
-	response, err := controller.imageService.AddImage(request)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	var response *responses.ImagePost
+	var err error
+
+	user := c.Query("user")
+	if user != "" {
+
+	} else {
+		response, err = controller.imageService.AddImage(request)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, response)

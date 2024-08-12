@@ -1,10 +1,13 @@
 package main
 
 import (
+	"cloud.google.com/go/firestore"
+	"context"
 	"fmt"
 	"github.com/AstroStreakNet/telescope/astrometry"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	"google.golang.org/api/option"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
@@ -14,7 +17,9 @@ import (
 	"webback/services"
 )
 
-func newDatabaseConnection() *gorm.DB {
+// Database connections
+
+func newInMemoryDatabaseConnection() *gorm.DB {
 	database, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
@@ -22,13 +27,30 @@ func newDatabaseConnection() *gorm.DB {
 	return database
 }
 
+func newMySQLDatabaseConnection() *gorm.DB {
+	database, err := gorm.Open(mysql.Open(os.Getenv("MYSQL_DSN")), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	return database
+}
+
+func newFirestoreConnection(ctx context.Context, projectID, credentialsPath string) *firestore.Client {
+	clientOptions := option.WithCredentialsFile(credentialsPath)
+	client, err := firestore.NewClient(ctx, projectID, clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return client
+}
+
 func main() {
 
 	// Load .env
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	//err := godotenv.Load(".env")
+	//if err != nil {
+	//	log.Fatal("Error loading .env file")
+	//}
 
 	// Get .env variables
 	privatePath := os.Getenv("PRIVATE_PATH")
@@ -43,28 +65,25 @@ func main() {
 	if urlPath == "" {
 		log.Fatal("URL_PATH environment variable not set")
 	}
-	// In a cloud environment a secret vault should be used instead of environment variables
-	apiKey := os.Getenv("ASTROMETRY_API_KEY")
-	if apiKey == "" {
-		log.Fatal("ASTROMETRY_API_KEY not set")
-	}
 
 	// Connect to database
-	database := newDatabaseConnection()
+	database := newInMemoryDatabaseConnection()
 
 	// Repositories
 	imageRepository, err := repositories.NewImageRepositoryInDatabase(database)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("failed to create image repository: %v", err))
 	}
+
 	userRepository, err := repositories.NewUserRepositoryInDatabase(database)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("failed to create user repository: %v", err))
 	}
+
 	fileRepository := repositories.NewFileRepositoryOnSystem(privatePath, publicPath)
 
 	// Proxies
-	astrometryProxy := astrometry.NewAstrometryClient(apiKey)
+	astrometryProxy := astrometry.NewAstrometryClient("placeholder")
 
 	// Services
 	imageService := services.NewImageGarfield(
