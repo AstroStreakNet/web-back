@@ -29,7 +29,7 @@ func NewImageGarfield(
 	userRepository repositories.User,
 	fileRepository repositories.File,
 	astrometryProxy astrometry.Client,
-	urlPath string,
+	urlPath *string,
 ) *ImageGarfield {
 
 	return &ImageGarfield{
@@ -37,14 +37,23 @@ func NewImageGarfield(
 		fileRepository,
 		userRepository,
 		astrometryProxy,
-		urlPath,
+		*urlPath,
 	}
 }
 
-func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.ImagePost, error) {
+func (service *ImageGarfield) AddImage(request requests.ImagePost, user string) error {
 
 	// Begin Image creation
 	imageBuilder := models.NewImageBuilder()
+
+	if user != "" {
+		userID64, err := strconv.ParseUint(user, 10, 32)
+		if err != nil {
+			return err
+		}
+		userID := uint(userID64)
+		imageBuilder.WithUserID(&userID)
+	}
 
 	// Get JSON from request
 	imageJSON := request.MetaData
@@ -55,7 +64,7 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 	fileName, err := service.fileRepository.GenerateFileName(imageJSON.FileType)
 	if err != nil {
 		slog.Error("Error generating file path " + err.Error())
-		return nil, err
+		return err
 	}
 	imageBuilder.WithPath(fileName)
 
@@ -78,7 +87,7 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 	// Write file
 	err = service.fileRepository.Write(&bytesBuffer, fileName)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// If public create preview image
@@ -87,19 +96,19 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 		path := service.fileRepository.GetFilePath(fileName)
 		file, err := os.Open(path)
 		if err != nil {
-			return nil, err // TODO, bypass error and allow for partially correct submissions
+			return err // TODO, bypass error and allow for partially correct submissions
 		}
 
 		var bytesBuffer bytes.Buffer
 		_, err = io.Copy(&bytesBuffer, file)
 
-		err = service.fileRepository.WritePreview(&bytesBuffer, fileName)
+		publicFile, err := service.fileRepository.WritePreview(&bytesBuffer, fileName)
 		if err != nil {
 			slog.Error("Error writing preview file " + err.Error())
-			return nil, err
+			return err
 		}
 
-		imageBuilder.WithURL(service.urlPath + "/" + fileName)
+		imageBuilder.WithURL(service.urlPath + "/" + *publicFile)
 	}
 
 	// Build image
@@ -109,10 +118,10 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost) (*responses.I
 	err = service.imageRepository.Create(image)
 	if err != nil {
 		println("Error creating image: " + err.Error())
-		return nil, err
+		return err
 	}
 
-	return &responses.ImagePost{Success: true}, nil
+	return nil
 }
 
 func (service *ImageGarfield) GetImage(id string) (*responses.ImageGet, error) {

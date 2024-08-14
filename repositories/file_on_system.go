@@ -77,26 +77,26 @@ func (repository *FileOnSystem) Write(data *bytes.Buffer, fileName string) error
 	return nil
 }
 
-func (repository *FileOnSystem) WritePreview(data *bytes.Buffer, fileName string) error {
+func (repository *FileOnSystem) WritePreview(data *bytes.Buffer, fileName string) (*string, error) {
 	// Get preview file name
 	fileType := filepath.Ext(fileName)
 	previewFileName := strings.TrimSuffix(fileName, fileType) + ".jpg"
 
 	if repository.PreviewExists(previewFileName) {
-		return &FileAlreadyExists{}
+		return nil, &FileAlreadyExists{}
 	}
 	filePath := repository.publicPath + "/" + previewFileName
 
 	// Convert image data to jpeg
 	preview, err := repository.convertImageToJPEG(data, fileType)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Create file
 	file, err := os.Create(filePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func(file *os.File) {
 		err = file.Close()
@@ -108,10 +108,10 @@ func (repository *FileOnSystem) WritePreview(data *bytes.Buffer, fileName string
 	// Copy data to file
 	_, err = io.Copy(file, preview)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &previewFileName, nil
 }
 
 func (repository *FileOnSystem) Overwrite(data *bytes.Buffer, fileName string) error {

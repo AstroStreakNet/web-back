@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -12,12 +14,14 @@ import (
 
 type Image struct {
 	imageService services.Image
+	authService  services.Auth
 }
 
 // NewImageController Constructor for Image
-func NewImageController(imageService services.Image) *Image {
+func NewImageController(imageService services.Image, authService services.Auth) *Image {
 	return &Image{
 		imageService,
+		authService,
 	}
 }
 
@@ -26,6 +30,7 @@ func (controller *Image) GetImage(c *gin.Context) {
 	if id != "" {
 		response, err := controller.imageService.GetImage(id)
 		if err != nil {
+			// TODO replace err.Error() with ambiguous message
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -35,6 +40,7 @@ func (controller *Image) GetImage(c *gin.Context) {
 
 	response, err := controller.imageService.GetAllImagesPublic()
 	if err != nil {
+		// TODO replace err.Error() with ambiguous message
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -45,6 +51,7 @@ func (controller *Image) PostImage(c *gin.Context) {
 
 	var request requests.ImagePost
 	if err := c.ShouldBind(&request); err != nil {
+		// TODO replace err.Error() with ambiguous message
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -56,21 +63,40 @@ func (controller *Image) PostImage(c *gin.Context) {
 		return
 	}
 
-	var response *responses.ImagePost
-	var err error
-
 	user := c.Query("user")
 	if user != "" {
-
-	} else {
-		response, err = controller.imageService.AddImage(request)
+		requestHeader := c.Request.Header.Get("Authorization")
+		token, claims, err := controller.authService.ParseToken(requestHeader)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			if errors.Is(err, jwt.ErrSignatureInvalid) {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"message": "unauthorized",
+				})
+				return
+			}
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "bad request",
+			})
+			return
+		}
+		if !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
+		if claims.User != user {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid auth for requested user"})
 			return
 		}
 	}
+	err := controller.imageService.AddImage(request, user)
 
-	c.JSON(http.StatusOK, response)
+	if err != nil {
+		// TODO replace err.Error() with ambiguous message
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, &responses.ImagePost{Message: "image successfully uploaded"})
 }
 
 func (controller *Image) validFileType(fileType string) bool {

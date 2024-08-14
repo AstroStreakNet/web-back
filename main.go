@@ -1,58 +1,20 @@
 package main
 
 import (
-	"cloud.google.com/go/firestore"
-	"context"
 	"fmt"
 	"github.com/AstroStreakNet/telescope/astrometry"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/api/option"
-	"gorm.io/driver/mysql"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 	"log"
 	"os"
 	"webback/controllers"
 	"webback/repositories"
 	"webback/services"
+	"webback/setup"
 )
-
-// Database connections
-
-func newInMemoryDatabaseConnection() *gorm.DB {
-	database, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	return database
-}
-
-func newMySQLDatabaseConnection() *gorm.DB {
-	database, err := gorm.Open(mysql.Open(os.Getenv("MYSQL_DSN")), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	return database
-}
-
-func newFirestoreConnection(ctx context.Context, projectID, credentialsPath string) *firestore.Client {
-	clientOptions := option.WithCredentialsFile(credentialsPath)
-	client, err := firestore.NewClient(ctx, projectID, clientOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return client
-}
 
 func main() {
 
-	// Load .env
-	//err := godotenv.Load(".env")
-	//if err != nil {
-	//	log.Fatal("Error loading .env file")
-	//}
-
-	// Get .env variables
+	// Get environment variables
 	privatePath := os.Getenv("PRIVATE_PATH")
 	if privatePath == "" {
 		log.Fatal("PRIVATE_PATH environment variable not set")
@@ -67,7 +29,7 @@ func main() {
 	}
 
 	// Connect to database
-	database := newInMemoryDatabaseConnection()
+	database := setup.NewMySQLDatabaseConnection()
 
 	// Repositories
 	imageRepository, err := repositories.NewImageRepositoryInDatabase(database)
@@ -87,10 +49,13 @@ func main() {
 
 	// Services
 	imageService := services.NewImageGarfield(
-		imageRepository, userRepository, fileRepository, *astrometryProxy, urlPath)
+		imageRepository, userRepository, fileRepository, *astrometryProxy, &urlPath)
+
+	authService := services.NewAuthJonesy(
+		userRepository, 30, "placeholder")
 
 	// Controllers
-	imageController := controllers.NewImageController(imageService)
+	imageController := controllers.NewImageController(imageService, authService)
 
 	// Setup router
 	router := gin.Default()

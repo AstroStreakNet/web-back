@@ -44,6 +44,18 @@ func (repository *UserInDatabase) FindById(id uint) (*models.User, error) {
 	return user, nil
 }
 
+func (repository *UserInDatabase) FindByEmail(email string) (*models.User, error) {
+	var user *models.User
+	result := repository.database.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, &UserNotFound{}
+		}
+		return nil, result.Error
+	}
+	return user, nil
+}
+
 func (repository *UserInDatabase) FindByFirstName(name string) (*[]models.User, error) {
 	var users []models.User
 	result := repository.database.Where("first_name = ?", name).Find(&users)

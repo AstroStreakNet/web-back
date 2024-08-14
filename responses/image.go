@@ -9,5 +9,5 @@ type ImageGet struct {
 }
 
 type ImagePost struct {
-	Success bool `json:"success"`
+	Message string `json:"message"`
 }

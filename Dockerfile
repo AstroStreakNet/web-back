@@ -1,4 +1,4 @@
-FROM golang:1.22.1
+FROM golang:1.22.1-alpine
 
 WORKDIR /app
 
@@ -8,7 +8,6 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy packages
-COPY astro/ ./astro
 COPY auth/ ./auth
 COPY controllers/ ./controllers
 COPY FITS/ ./FITS
@@ -17,19 +16,15 @@ COPY repositories/ ./repositories
 COPY requests/ ./requests
 COPY responses/ ./responses
 COPY services/ ./services
+COPY setup/ ./setup
 # Copy main.go and any other go file in this directory
 COPY *.go ./
 
 # Build application
-RUN CGO_ENABLED=1 GOOS=linux go build -o /web-back
+RUN CGO_ENABLED=0 GOOS=linux go build -o /web-back
 
 # Expost port that GIN runs on
 EXPOSE 8090
-
-# Set environment variables
-ENV PRIVATE_PATH="./astro/private"
-ENV PUBLIC_PATH="./astro/public"
-ENV URL_PATH="public"
 
 # Run application
 CMD ["/web-back"]

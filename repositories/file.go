@@ -6,7 +6,7 @@ type File interface {
 	Initialize() error
 	Read(path string) (*bytes.Buffer, error)
 	Write(data *bytes.Buffer, fileName string) error
-	WritePreview(data *bytes.Buffer, fileName string) error
+	WritePreview(data *bytes.Buffer, fileName string) (*string, error)
 	Overwrite(data *bytes.Buffer, fileName string) error
 	Delete(fileName string) error
 	DeletePreview(fileName string) error
