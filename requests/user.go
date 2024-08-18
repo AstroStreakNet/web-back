@@ -12,3 +12,12 @@ type Register struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
 }
+
+type UpdateDetails struct {
+	Updates []Update `json:"updates"`
+}
+
+type Update struct {
+	Field    string `json:"field"`
+	NewValue string `json:"new_value"`
+}

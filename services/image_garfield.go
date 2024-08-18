@@ -96,7 +96,7 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost, user string) 
 		path := service.fileRepository.GetFilePath(fileName)
 		file, err := os.Open(path)
 		if err != nil {
-			return err // TODO, bypass error and allow for partially correct submissions
+			return &IncidentalError{}
 		}
 
 		var bytesBuffer bytes.Buffer
@@ -105,10 +105,22 @@ func (service *ImageGarfield) AddImage(request requests.ImagePost, user string) 
 		publicFile, err := service.fileRepository.WritePreview(&bytesBuffer, fileName)
 		if err != nil {
 			slog.Error("Error writing preview file " + err.Error())
-			return err
+			return &IncidentalError{}
 		}
 
 		imageBuilder.WithURL(service.urlPath + "/" + *publicFile)
+	}
+
+	// If information missing, upload to astrometry
+	if imageJSON.Declination == "" || imageJSON.RightAscension == "" {
+
+		path := service.fileRepository.GetFilePath(fileName)
+		submissionID, err := service.astrometryProxy.UploadFile(path)
+		if err != nil {
+			slog.Error("Error uploading file to astrometry" + err.Error())
+			return &IncidentalError{}
+		}
+		imageBuilder.WithAstrometryID(strconv.Itoa(submissionID))
 	}
 
 	// Build image

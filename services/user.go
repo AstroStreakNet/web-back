@@ -3,17 +3,19 @@ package services
 import (
 	"webback/models"
 	"webback/requests"
+	"webback/responses"
 )
 
 type User interface {
 	Login(request *requests.Login) (*models.User, error)
 	Register(request *requests.Register) error
 	GetUser(email string) (*models.User, error)
-	GetDetails()
+	GetDetails(userID string) (*responses.GetDetails, error)
 	UpdateDetails()
 }
 
 // Errors
+
 type InvalidEmail struct{}
 
 func (e InvalidEmail) Error() string {

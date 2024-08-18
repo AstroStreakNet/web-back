@@ -3,10 +3,12 @@ package services
 import (
 	"errors"
 	"net/mail"
+	"strconv"
 	"webback/auth"
 	"webback/models"
 	"webback/repositories"
 	"webback/requests"
+	"webback/responses"
 )
 
 type UserChurch struct {
@@ -67,6 +69,48 @@ func (service *UserChurch) Register(request *requests.Register) error {
 
 	user := userBuilder.Build()
 	return service.userRepository.Create(user)
+}
+
+func (service *UserChurch) GetUser(email string) (*models.User, error) {
+	return service.userRepository.FindByEmail(email)
+}
+
+func (service *UserChurch) GetDetails(userID string) (*responses.GetDetails, error) {
+
+	userIDUint64, err := strconv.ParseUint(userID, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	userIDUint := uint(userIDUint64)
+
+	user, err := service.userRepository.FindById(userIDUint)
+	if err != nil {
+		return nil, err
+	}
+
+	var firstName, lastName string
+	if user.FirstName == nil {
+		firstName = ""
+	} else {
+		firstName = *user.FirstName
+	}
+	if user.LastName == nil {
+		lastName = ""
+	} else {
+		lastName = *user.LastName
+	}
+
+	return &responses.GetDetails{
+		Email:       user.Email,
+		FirstName:   firstName,
+		LastName:    lastName,
+		DisplayName: user.DisplayName,
+	}, nil
+}
+
+func (service *UserChurch) UpdateDetails() {
+
 }
 
 // Private

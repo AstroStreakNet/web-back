@@ -91,9 +91,14 @@ func (controller *Image) PostImage(c *gin.Context) {
 	err := controller.imageService.AddImage(request, user)
 
 	if err != nil {
-		// TODO replace err.Error() with ambiguous message
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		if errors.Is(err, services.IncidentalError{}) {
+			c.JSON(http.StatusOK, &responses.ImagePost{Message: err.Error()})
+			return
+		} else {
+			// TODO replace err.Error() with ambiguous message
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, &responses.ImagePost{Message: "image successfully uploaded"})
